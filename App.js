@@ -1,14 +1,19 @@
 import React from 'react'
-// import { Login } from './src/screens/Login'
+import { Login } from './src/screens/Login'
 import Dashboard from './src/screens/Dashboard'
+import { NavigationContainer } from '@react-navigation/native'
+// import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { AuthProvider, useAuth } from './src/hooks/auth'
 
-import theme from './src/global/styles/theme'
-import { ThemeProvider } from 'styled-components'
+// const Stack = createNativeStackNavigator()
+
 export default function App () {
+  const { user } = useAuth()
   return (
-    <ThemeProvider theme={theme}>
-      <Dashboard />
-      {/* <Login /> */}
-    </ThemeProvider>
+    <NavigationContainer>
+      <AuthProvider>
+        {user ? <Dashboard /> : <Login />}
+      </AuthProvider>
+    </NavigationContainer>
   )
 }
