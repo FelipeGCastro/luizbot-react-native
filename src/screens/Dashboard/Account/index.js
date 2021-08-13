@@ -1,24 +1,24 @@
 import React, { useRef } from 'react'
 import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native'
-import { Picker } from '@react-native-picker/picker'
 import { Feather } from '@expo/vector-icons'
-import theme from '../../global/styles/theme'
+import theme from '../../../global/styles/theme'
+import Symbol from './Symbol'
+import Strategy from './Strategy'
 
-const STRATEGIES = {
-  sharkStrategy: 'Tubarão',
-  hiddenDivergence: 'Hidden Divergence'
-}
-
-const Account = ({ data, setBotOn, symbols, setSymbol }) => {
+const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, strategies, signOut }) => {
   const pickerRef = useRef()
+  const pickerStrategyRef = useRef()
 
   function toogleBotOn () {
     const action = data.botOn ? 'Desligar' : 'Ligar'
     setAlert(action, () => setBotOn(!data.botOn))
   }
-  function setSymbolValue (value) {
-    setAlert(value, () => setSymbol(value))
-  }
+
+  function setSymbolValue (value) { setAlert(value, () => setSymbol(value)) }
+
+  function setStrategyValue (value) { setAlert(value, () => setStrategy(value)) }
+
+  function handleSignOut () { setAlert('Sign Out', () => signOut()) }
 
   function setAlert (actionName, func) {
     Alert.alert(actionName, 'Tem certeza que deseja fazer essa ação?', [
@@ -33,34 +33,26 @@ const Account = ({ data, setBotOn, symbols, setSymbol }) => {
   return (
     <View style={styles.tradeAccountContainer}>
       <TouchableOpacity onPress={toogleBotOn} activeOpacity={0.70} style={styles.tradeOnContainer}>
-        <Feather name='power' size={24} color={data.botOn ? theme.colors.success : theme.colors.failed} />
-        <Text style={styles.tradOnText}>{data.botOn ? 'Ligado' : 'Desligado'}</Text>
+        <Feather name='power' size={24} color={data?.botOn ? theme.colors.success : theme.colors.failed} />
+        <Text style={styles.tradOnText}>{data?.botOn ? 'Ligado' : 'Desligado'}</Text>
       </TouchableOpacity>
-      <Picker
-        selectedValue={data.symbol}
-        ref={pickerRef}
-        onValueChange={(itemValue, itemIndex) =>
-          setSymbolValue(itemValue)}
-      >
-        {symbols.map((symbol, i) => <Picker.Item key={i} label={symbol} value={symbol} />)}
-      </Picker>
-      <TouchableOpacity
-        onPress={() => pickerRef.current.focus()}
-        activeOpacity={0.70}
-        style={{ ...styles.optionContainer }}
-      >
-        <Text style={styles.optionLabel}>Simbolo:</Text>
-
-        <Text style={[styles.optionValue, styles.symbol]}>{data.symbol}</Text>
-
-      </TouchableOpacity>
-      <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-        <Text style={styles.optionLabel}>Estratégia:</Text>
-        <Text style={[styles.optionValue, styles.strategy]}>{STRATEGIES[data.strategy]}</Text>
-      </TouchableOpacity>
+      <Symbol
+        symbol={data.symbol}
+        symbols={symbols}
+        pickerRef={pickerRef}
+        styles={styles}
+        setSymbolValue={setSymbolValue}
+      />
+      <Strategy
+        strategy={data.strategy}
+        strategies={strategies}
+        styles={styles}
+        pickerStrategyRef={pickerStrategyRef}
+        setStrategyValue={setStrategyValue}
+      />
       <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
         <Text style={styles.optionLabel}>Total Ganho:</Text>
-        <Text style={styles.optionValue}>200%</Text>
+        <Text style={styles.optionValue}>0%</Text>
       </TouchableOpacity>
       <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
         <Text style={styles.optionLabel}>Alavancagem:</Text>
@@ -69,6 +61,9 @@ const Account = ({ data, setBotOn, symbols, setSymbol }) => {
       <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
         <Text style={styles.optionLabel}>Valor Entrada:</Text>
         <Text style={styles.optionValue}>$ {Number(data.entryValue).toFixed(2)}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleSignOut()} activeOpacity={0.70} style={styles.optionContainer}>
+        <Text style={styles.optionValue}>Sign out</Text>
       </TouchableOpacity>
     </View>
   )

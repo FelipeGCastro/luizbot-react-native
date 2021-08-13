@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native'
 
-import TradeComponent from './trade'
-import Account from './account'
+import TradeComponent from './Trade'
+import Account from './Account'
+import Indicators from './Indicators'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import theme from '../../global/styles/theme'
@@ -15,25 +16,39 @@ import { callGetApi, callUptadeApi } from './helpers'
 const Dashboard = () => {
   const { signOut } = useAuth()
   const [loadingData, setLoadingData] = useState(true)
-  const [accountData, setAccountData] = useState(false)
+  const [accountData, setAccountData] = useState({})
+
   const [symbols, setSymbols] = useState([])
+  const [strategies, setStrategies] = useState({})
 
   useEffect(() => {
     async function getAccountData () {
-      const data = await callGetApi('/account/', null, signOut)
-      setAccountData(data)
+      getAllAccountData()
+      updatingData()
+      getStrategies()
       const symbolsStoraged = await AsyncStorage.getItem('@luizbot:symbols')
       if (symbolsStoraged) {
         const symbolsParsed = JSON.parse(symbolsStoraged)
         setSymbols(symbolsParsed)
       } else {
-        await getSymbols()
+        getSymbols()
       }
-
       setLoadingData(false)
     }
-    getAccountData()
+    return () => { getAccountData() }
   }, [])
+
+  function updatingData () { setInterval(() => { getAllAccountData() }, 30000) }
+
+  async function getAllAccountData () {
+    const data = await callGetApi('/account/', null, signOut)
+    setAccountData(data)
+  }
+
+  async function getStrategies () {
+    const data = await callGetApi('/account/strategies')
+    setStrategies(data)
+  }
 
   async function getSymbols () {
     const symbolsFetched = await callGetApi('/account/symbols', null, signOut)
@@ -47,6 +62,12 @@ const Dashboard = () => {
     setAccountData(data)
     setLoadingData(false)
   }
+  async function setStrategy (strategy) {
+    setLoadingData(true)
+    const data = await callUptadeApi('/account/strategy', { strategy })
+    setAccountData(data)
+    setLoadingData(false)
+  }
 
   async function setBotOn (bool) {
     setLoadingData(true)
@@ -57,7 +78,7 @@ const Dashboard = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TradeComponent />
+      <TradeComponent data={accountData} />
       <View style={styles.marketSwipe} />
       <SwipeButton
         railBackgroundColor={theme.colors.button}
@@ -70,13 +91,17 @@ const Dashboard = () => {
         thumbIconBackgroundColor={theme.colors.swipeColor}
         icon
       />
-      {loadingData && <ActivityIndicator size='large' />}
+      <Indicators lastIndicatorsData={accountData.lastIndicatorsData} />
+      {loadingData && <ActivityIndicator color='#fff' size='large' />}
       <View style={styles.tradeBody}>
         <Account
           data={accountData}
           setBotOn={setBotOn}
           symbols={symbols}
           setSymbol={setSymbol}
+          strategies={strategies}
+          setStrategy={setStrategy}
+          signOut={signOut}
         />
         <FlatList
           keyExtractor={item => item.id.toString()}
