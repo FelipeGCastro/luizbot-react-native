@@ -11,7 +11,7 @@ import { useAuth } from '../../hooks/auth'
 import theme from '../../global/styles/theme'
 
 export function Login () {
-  const { signIn } = useAuth()
+  const { signIn, userStoragedLoading } = useAuth()
   const [email, onChangeEmail] = useState()
   const [password, onChangePassword] = useState()
   const [errors, setErrors] = useState([])
@@ -24,7 +24,7 @@ export function Login () {
     try {
       await signIn(email, password)
     } catch (error) {
-      Alert.alert('Problemas ao autentica')
+      Alert.alert('Problemas ao autenticar')
     }
     //
   }
@@ -32,6 +32,8 @@ export function Login () {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Luiz Bot</Text>
+      {userStoragedLoading && <Text style={styles.title}>Carregando...</Text>}
+
       <TextInput
         style={styles.input}
         placeholder='Email'

@@ -1,15 +1,51 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, Alert, ActivityIndicator } from 'react-native'
+import api from '../../services/api'
 
 import TradeComponent from './trade'
-import { Feather } from '@expo/vector-icons'
+import Account from './account'
 
 import theme from '../../global/styles/theme'
 import SwipeButton from 'rn-swipe-button'
 import data from './data'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useAuth } from '../../hooks/auth'
 
 const Dashboard = () => {
+  const accountdatakey = '@luizbot:accountdata'
+  const { signOut } = useAuth()
+  const [loadingData, setLoadingData] = useState(true)
+  const [accountData, setAccountData] = useState(false)
+
+  useEffect(() => {
+    async function getUserStoraged () {
+      const accountDataStoraged = await AsyncStorage.getItem(accountdatakey)
+      if (accountDataStoraged) {
+        const accountDataParsed = JSON.parse(accountDataStoraged)
+        setAccountData(accountDataParsed)
+      } else {
+        await getAccountData()
+      }
+      setLoadingData(false)
+    }
+    getUserStoraged()
+  }, [])
+
+  async function getAccountData () {
+    try {
+      const result = await api.get('/account/')
+      if (result) {
+        setAccountData(result.data)
+        console.log(result.data)
+        AsyncStorage.setItem(accountdatakey, JSON.stringify(result.data))
+      }
+    } catch (error) {
+      console.log('error fetching data', error)
+      Alert.alert('Error', 'Problema ao tentar acessar seus dados')
+      if (error.response.data.error === 'Token invalid') signOut()
+    }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <TradeComponent />
@@ -25,37 +61,9 @@ const Dashboard = () => {
         thumbIconBackgroundColor={theme.colors.swipeColor}
         icon
       />
+      {loadingData && <ActivityIndicator size='large' />}
       <View style={styles.tradeBody}>
-        <View style={styles.tradeAccountContainer}>
-          <TouchableOpacity activeOpacity={0.70} style={styles.tradeOnContainer}>
-            <Feather name='power' size={24} color={theme.colors.success} />
-            <Text style={styles.tradOnText}>Ligado</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Simbolo:</Text>
-            <Text style={[styles.optionValue, styles.symbol]}>BTCUSDT</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Estratégia:</Text>
-            <Text style={[styles.optionValue, styles.strategy]}>Hidden Divergence</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Total Ganho:</Text>
-            <Text style={styles.optionValue}>200%</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Alavancagem:</Text>
-            <Text style={styles.optionValue}>2x</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Valor Entrada:</Text>
-            <Text style={styles.optionValue}>$ 80,00</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-            <Text style={styles.optionLabel}>Saldo:</Text>
-            <Text style={styles.optionValue}>$ 40,00</Text>
-          </TouchableOpacity>
-        </View>
+        <Account data={accountData} />
         <FlatList
           keyExtractor={item => item.id.toString()}
           data={data}
@@ -85,47 +93,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
-  },
-  tradeAccountContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-    marginHorizontal: 8,
-    marginTop: 10
-  },
-  tradeOnContainer: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.button,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-    marginBottom: 10
-  },
-  tradOnText: {
-    color: '#fff',
-    marginLeft: 10
-  },
-  optionContainer: {
-    backgroundColor: theme.colors.button,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-    marginBottom: 10
-  },
-  optionLabel: {
-    color: '#fff',
-    fontSize: 15
-  },
-  optionValue: {
-    color: '#fff',
-    fontSize: 18
-  },
-  symbol: {
-    fontSize: 23,
-    color: theme.colors.normal
-  },
-  strategy: {
-    fontSize: 20,
-    color: theme.colors.normal
   },
   profitHistoryContainer: {
     flexGrow: 0,
