@@ -1,51 +1,60 @@
 import React, { useEffect, useState } from 'react'
 
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, Alert, ActivityIndicator } from 'react-native'
-import api from '../../services/api'
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native'
 
 import TradeComponent from './trade'
 import Account from './account'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import theme from '../../global/styles/theme'
 import SwipeButton from 'rn-swipe-button'
 import data from './data'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAuth } from '../../hooks/auth'
+import { callGetApi, callUptadeApi } from './helpers'
 
 const Dashboard = () => {
-  const accountdatakey = '@luizbot:accountdata'
   const { signOut } = useAuth()
   const [loadingData, setLoadingData] = useState(true)
   const [accountData, setAccountData] = useState(false)
+  const [symbols, setSymbols] = useState([])
 
   useEffect(() => {
-    async function getUserStoraged () {
-      const accountDataStoraged = await AsyncStorage.getItem(accountdatakey)
-      if (accountDataStoraged) {
-        const accountDataParsed = JSON.parse(accountDataStoraged)
-        setAccountData(accountDataParsed)
+    async function getAccountData () {
+      const data = await callGetApi('/account/', null, signOut)
+      setAccountData(data)
+      const symbolsStoraged = await AsyncStorage.getItem('@luizbot:symbols')
+      if (symbolsStoraged) {
+        const symbolsParsed = JSON.parse(symbolsStoraged)
+        setSymbols(symbolsParsed)
       } else {
-        await getAccountData()
+        await getSymbols()
       }
+
       setLoadingData(false)
     }
-    getUserStoraged()
+    getAccountData()
   }, [])
 
-  async function getAccountData () {
-    try {
-      const result = await api.get('/account/')
-      if (result) {
-        setAccountData(result.data)
-        console.log(result.data)
-        AsyncStorage.setItem(accountdatakey, JSON.stringify(result.data))
-      }
-    } catch (error) {
-      console.log('error fetching data', error)
-      Alert.alert('Error', 'Problema ao tentar acessar seus dados')
-      if (error.response.data.error === 'Token invalid') signOut()
-    }
+  async function getSymbols () {
+    const symbolsFetched = await callGetApi('/account/symbols', null, signOut)
+    await AsyncStorage.setItem('@luizbot:symbols', JSON.stringify(symbolsFetched))
+    setSymbols(symbolsFetched)
   }
+
+  async function setSymbol (symbol) {
+    setLoadingData(true)
+    const data = await callUptadeApi('/account/symbol', { symbol })
+    setAccountData(data)
+    setLoadingData(false)
+  }
+
+  async function setBotOn (bool) {
+    setLoadingData(true)
+    const data = await callUptadeApi('/account/boton', { botOn: bool }, signOut)
+    setAccountData(data)
+    setLoadingData(false)
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <TradeComponent />
@@ -63,7 +72,12 @@ const Dashboard = () => {
       />
       {loadingData && <ActivityIndicator size='large' />}
       <View style={styles.tradeBody}>
-        <Account data={accountData} />
+        <Account
+          data={accountData}
+          setBotOn={setBotOn}
+          symbols={symbols}
+          setSymbol={setSymbol}
+        />
         <FlatList
           keyExtractor={item => item.id.toString()}
           data={data}
