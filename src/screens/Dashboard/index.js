@@ -35,7 +35,7 @@ const Dashboard = () => {
       }
       setLoadingData(false)
     }
-    return () => { getAccountData() }
+    getAccountData()
   }, [])
 
   function updatingData () { setInterval(() => { getAllAccountData() }, 30000) }
@@ -56,22 +56,15 @@ const Dashboard = () => {
     setSymbols(symbolsFetched)
   }
 
-  async function setSymbol (symbol) {
-    setLoadingData(true)
-    const data = await callUptadeApi('/account/symbol', { symbol })
-    setAccountData(data)
-    setLoadingData(false)
-  }
-  async function setStrategy (strategy) {
-    setLoadingData(true)
-    const data = await callUptadeApi('/account/strategy', { strategy })
-    setAccountData(data)
-    setLoadingData(false)
-  }
+  function setSymbol (symbol) { setAccountApi('/account/leverage', { symbol }) }
+  function setStrategy (strategy) { setAccountApi('/account/leverage', { strategy }) }
+  function setLeverage (leverage) { setAccountApi('/account/leverage', { leverage }) }
+  function setEntryValue (entryValue) { setAccountApi('/account/entryValue', { entryValue }) }
+  function setBotOn (bool) { setAccountApi('/account/boton', { botOn: bool }) }
 
-  async function setBotOn (bool) {
+  async function setAccountApi (path, params) {
     setLoadingData(true)
-    const data = await callUptadeApi('/account/boton', { botOn: bool }, signOut)
+    const data = await callUptadeApi(path, params, signOut)
     setAccountData(data)
     setLoadingData(false)
   }
@@ -101,6 +94,8 @@ const Dashboard = () => {
           setSymbol={setSymbol}
           strategies={strategies}
           setStrategy={setStrategy}
+          setLeverage={setLeverage}
+          setEntryValue={setEntryValue}
           signOut={signOut}
         />
         <FlatList

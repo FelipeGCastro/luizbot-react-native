@@ -4,8 +4,10 @@ import { Feather } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
 import Symbol from './Symbol'
 import Strategy from './Strategy'
+import Leverage from './Leverage'
+import EntryValue from './entryValue'
 
-const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, strategies, signOut }) => {
+const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, setLeverage, setEntryValue, strategies, signOut }) => {
   const pickerRef = useRef()
   const pickerStrategyRef = useRef()
 
@@ -17,6 +19,8 @@ const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, strateg
   function setSymbolValue (value) { setAlert(value, () => setSymbol(value)) }
 
   function setStrategyValue (value) { setAlert(value, () => setStrategy(value)) }
+  function setLeverageValue (value) { setAlert(`${value}x`, () => setLeverage(value)) }
+  function setEntryValueValue (value) { setAlert(`$ ${Number(value).toFixed(2)}`, () => setEntryValue(value)) }
 
   function handleSignOut () { setAlert('Sign Out', () => signOut()) }
 
@@ -50,18 +54,21 @@ const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, strateg
         pickerStrategyRef={pickerStrategyRef}
         setStrategyValue={setStrategyValue}
       />
-      <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
+      <TouchableOpacity activeOpacity={0.70} style={styles.gainContainer}>
         <Text style={styles.optionLabel}>Total Ganho:</Text>
         <Text style={styles.optionValue}>0%</Text>
       </TouchableOpacity>
-      <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-        <Text style={styles.optionLabel}>Alavancagem:</Text>
-        <Text style={styles.optionValue}>{data.leverage}x</Text>
-      </TouchableOpacity>
-      <TouchableOpacity activeOpacity={0.70} style={styles.optionContainer}>
-        <Text style={styles.optionLabel}>Valor Entrada:</Text>
-        <Text style={styles.optionValue}>$ {Number(data.entryValue).toFixed(2)}</Text>
-      </TouchableOpacity>
+      <Leverage
+        leverage={data.leverage}
+        styles={styles}
+        setLeverageValue={setLeverageValue}
+      />
+      <EntryValue
+        entryValue={data.entryValue}
+        styles={styles}
+        setEntryValueValue={setEntryValueValue}
+      />
+
       <TouchableOpacity onPress={() => handleSignOut()} activeOpacity={0.70} style={styles.optionContainer}>
         <Text style={styles.optionValue}>Sign out</Text>
       </TouchableOpacity>
@@ -88,12 +95,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 10
   },
-  optionContainer: {
+  gainContainer: {
     backgroundColor: theme.colors.button,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 6,
-    marginBottom: 10
+    marginTop: 10
+  },
+  optionContainer: {
+    backgroundColor: theme.colors.button,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6
   },
   optionLabel: {
     color: '#fff',
