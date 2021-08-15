@@ -5,20 +5,17 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, Activ
 import TradeComponent from './Trade'
 import Account from './Account'
 import Indicators from './Indicators'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import theme from '../../global/styles/theme'
 import SwipeButton from 'rn-swipe-button'
 import data from './data'
 import { useAuth } from '../../hooks/auth'
-import { callGetApi, callUptadeApi } from './helpers'
+import { callGetApi, callUptadeApi } from '../../services/helpers'
 
-const Dashboard = () => {
+const Dashboard = ({ navigation }) => {
   const { signOut } = useAuth()
   const [loadingData, setLoadingData] = useState(true)
   const [accountData, setAccountData] = useState({})
-
-  const [symbols, setSymbols] = useState([])
   const [strategies, setStrategies] = useState({})
 
   useEffect(() => {
@@ -26,19 +23,13 @@ const Dashboard = () => {
       getAllAccountData()
       updatingData()
       getStrategies()
-      const symbolsStoraged = await AsyncStorage.getItem('@luizbot:symbols')
-      if (symbolsStoraged) {
-        const symbolsParsed = JSON.parse(symbolsStoraged)
-        setSymbols(symbolsParsed)
-      } else {
-        getSymbols()
-      }
       setLoadingData(false)
     }
     getAccountData()
   }, [])
 
   function updatingData () { setInterval(() => { getAllAccountData() }, 30000) }
+  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData.symbols }) }
 
   async function getAllAccountData () {
     const data = await callGetApi('/account/', null, signOut)
@@ -48,12 +39,6 @@ const Dashboard = () => {
   async function getStrategies () {
     const data = await callGetApi('/account/strategies')
     setStrategies(data)
-  }
-
-  async function getSymbols () {
-    const symbolsFetched = await callGetApi('/account/symbols', null, signOut)
-    await AsyncStorage.setItem('@luizbot:symbols', JSON.stringify(symbolsFetched))
-    setSymbols(symbolsFetched)
   }
 
   function setSymbol (symbol) { setAccountApi('/account/leverage', { symbol }) }
@@ -90,8 +75,8 @@ const Dashboard = () => {
         <Account
           data={accountData}
           setBotOn={setBotOn}
-          symbols={symbols}
           setSymbol={setSymbol}
+          pushToSymbols={pushToSymbols}
           strategies={strategies}
           setStrategy={setStrategy}
           setLeverage={setLeverage}

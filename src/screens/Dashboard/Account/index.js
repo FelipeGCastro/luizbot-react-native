@@ -2,13 +2,12 @@ import React, { useRef } from 'react'
 import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
-import Symbol from './Symbol'
+import Symbols from './Symbols'
 import Strategy from './Strategy'
 import Leverage from './Leverage'
 import EntryValue from './entryValue'
 
-const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, setLeverage, setEntryValue, strategies, signOut }) => {
-  const pickerRef = useRef()
+const Account = ({ data = {}, setBotOn, setSymbol, pushToSymbols, setStrategy, setLeverage, setEntryValue, strategies, signOut }) => {
   const pickerStrategyRef = useRef()
 
   function toogleBotOn () {
@@ -40,10 +39,9 @@ const Account = ({ data = {}, setBotOn, symbols, setSymbol, setStrategy, setLeve
         <Feather name='power' size={24} color={data?.botOn ? theme.colors.success : theme.colors.failed} />
         <Text style={styles.tradOnText}>{data?.botOn ? 'Ligado' : 'Desligado'}</Text>
       </TouchableOpacity>
-      <Symbol
+      <Symbols
         symbol={data.symbol}
-        symbols={symbols}
-        pickerRef={pickerRef}
+        pushToSymbols={pushToSymbols}
         styles={styles}
         setSymbolValue={setSymbolValue}
       />
