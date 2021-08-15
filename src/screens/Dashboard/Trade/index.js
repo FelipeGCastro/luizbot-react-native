@@ -2,28 +2,30 @@ import React from 'react'
 import { View, Text, StyleSheet, StatusBar } from 'react-native'
 import { Foundation } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
+import { useAccountData } from '../../../hooks/accountdata'
 
-const Trade = ({ data }) => {
+const Trade = () => {
+  const { accountData } = useAccountData
   return (
     <View style={styles.tradeWrapper}>
       <View style={styles.tradeStatus}>
-        <Text style={styles.tradeStatusText}>{data.tradingOn ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
-        {data.tradingOn && <Foundation name='record' size={22} color='red' />}
+        <Text style={styles.tradeStatusText}>{accountData?.tradeOn ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
+        {accountData?.tradingOn && <Foundation name='record' size={22} color='red' />}
 
       </View>
       <View style={styles.tradeBox}>
         <View style={styles.tradeColumn}>
           <Text style={styles.tradeLabel}>StopLoss:</Text>
-          <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{data.stopMarketPrice || '0.00'}</Text>
+          <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{accountData?.stopMarketPrice || '0.00'}</Text>
           <Text style={styles.percentage}>0.00%</Text>
         </View>
         <View style={[styles.tradeColumn, styles.center]}>
           <Text style={styles.tradeLabel}>Entrada:</Text>
-          <Text style={styles.tradeValue}>{data.entryPrice || '0.00'}</Text>
+          <Text style={styles.tradeValue}>{accountData?.entryPrice || '0.00'}</Text>
         </View>
         <View style={[styles.tradeColumn, styles.right]}>
           <Text style={styles.tradeLabel}>Take Profit:</Text>
-          <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{data.takeProfitPrice || '0.00'}</Text>
+          <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{accountData?.takeProfitPrice || '0.00'}</Text>
           <Text style={styles.percentage}>0.00%</Text>
         </View>
       </View>

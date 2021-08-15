@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, StyleSheet, ToastAndroid, TouchableOpacity, Text, Alert } from 'react-native'
+import { SafeAreaView, StyleSheet, ToastAndroid, TouchableOpacity, ActivityIndicator, Text, Alert } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import theme from '../../global/styles/theme'
 import SectionedMultiSelect from 'react-native-sectioned-multi-select'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { callGetApi } from '../../services/helpers'
+import { callGetApi, callUptadeApi } from '../../services/helpers'
 import { useAuth } from '../../hooks/auth'
 
-const Symbols = ({ Symbols = [], route }) => {
+const Symbols = ({ Symbols = [], route, navigation }) => {
   const { signOut } = useAuth()
   const [arraySymbols, setArraySymbols] = useState([])
   const [selectedSymbols, setSelectedSymbols] = useState([])
   const [selectedSymbolsObj, setSelectedSymbolsObj] = useState([])
+  const [loadingData, setLoadingData] = useState(true)
 
   useEffect(() => {
     const { symbols } = route.params
@@ -28,6 +29,7 @@ const Symbols = ({ Symbols = [], route }) => {
       } else {
         getSymbols()
       }
+      setLoadingData(false)
     }
     getSymbolsData()
   }, [])
@@ -36,6 +38,13 @@ const Symbols = ({ Symbols = [], route }) => {
     const symbolsFetched = await callGetApi('/account/symbols', null, signOut)
     await AsyncStorage.setItem('@luizbot:symbols', JSON.stringify(symbolsFetched))
     setSymbolsWithId(symbolsFetched)
+  }
+
+  async function setSymbols (symbols) {
+    setLoadingData(true)
+    await callUptadeApi('/account/symbols', { symbols })
+    setLoadingData(false)
+    navigation.pop()
   }
 
   async function setSymbolsWithId (symbols) {
@@ -70,7 +79,7 @@ const Symbols = ({ Symbols = [], route }) => {
         onPress: () => {},
         style: 'cancel'
       },
-      { text: 'OK', onPress: () => {} }
+      { text: 'OK', onPress: () => setSymbols(selectedSymbols) }
     ])
   }
   return (
@@ -86,6 +95,7 @@ const Symbols = ({ Symbols = [], route }) => {
         IconRenderer={MaterialIcons}
         selectedItems={selectedSymbols}
       />
+      {loadingData && <ActivityIndicator color='#fff' size='large' />}
       <TouchableOpacity style={styles.saveButton} onPress={() => handleSavePress()}>
         <Text style={styles.saveButtonText}>Salvar</Text>
       </TouchableOpacity>

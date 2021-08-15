@@ -6,16 +6,24 @@ import Symbols from './Symbols'
 import Strategy from './Strategy'
 import Leverage from './Leverage'
 import EntryValue from './entryValue'
+import { useAccountData } from '../../../hooks/accountdata'
+import { useAuth } from '../../../hooks/auth'
 
-const Account = ({ data = {}, setBotOn, setSymbol, pushToSymbols, setStrategy, setLeverage, setEntryValue, strategies, signOut }) => {
+const Account = ({ navigation }) => {
+  const { signOut } = useAuth()
+  const { setAccountApi, accountData, strategies } = useAccountData()
+
   const pickerStrategyRef = useRef()
-
   function toogleBotOn () {
-    const action = data.botOn ? 'Desligar' : 'Ligar'
-    setAlert(action, () => setBotOn(!data.botOn))
+    const action = accountData.botOn ? 'Desligar' : 'Ligar'
+    setAlert(action, () => setBotOn(!accountData.botOn))
   }
 
-  function setSymbolValue (value) { setAlert(value, () => setSymbol(value)) }
+  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData.symbols }) }
+  function setStrategy (strategy) { setAccountApi('/account/strategy', { strategy }) }
+  function setLeverage (leverage) { setAccountApi('/account/leverage', { leverage }) }
+  function setEntryValue (entryValue) { setAccountApi('/account/entryValue', { entryValue }) }
+  function setBotOn (bool) { setAccountApi('/account/boton', { botOn: bool }) }
 
   function setStrategyValue (value) { setAlert(value, () => setStrategy(value)) }
   function setLeverageValue (value) { setAlert(`${value}x`, () => setLeverage(value)) }
@@ -36,17 +44,16 @@ const Account = ({ data = {}, setBotOn, setSymbol, pushToSymbols, setStrategy, s
   return (
     <View style={styles.tradeAccountContainer}>
       <TouchableOpacity onPress={toogleBotOn} activeOpacity={0.70} style={styles.tradeOnContainer}>
-        <Feather name='power' size={24} color={data?.botOn ? theme.colors.success : theme.colors.failed} />
-        <Text style={styles.tradOnText}>{data?.botOn ? 'Ligado' : 'Desligado'}</Text>
+        <Feather name='power' size={24} color={accountData?.botOn ? theme.colors.success : theme.colors.failed} />
+        <Text style={styles.tradOnText}>{accountData?.botOn ? 'Ligado' : 'Desligado'}</Text>
       </TouchableOpacity>
       <Symbols
-        symbol={data.symbol}
+        symbols={accountData.symbols}
         pushToSymbols={pushToSymbols}
         styles={styles}
-        setSymbolValue={setSymbolValue}
       />
       <Strategy
-        strategy={data.strategy}
+        strategy={accountData.strategy}
         strategies={strategies}
         styles={styles}
         pickerStrategyRef={pickerStrategyRef}
@@ -57,17 +64,17 @@ const Account = ({ data = {}, setBotOn, setSymbol, pushToSymbols, setStrategy, s
         <Text style={styles.optionValue}>0%</Text>
       </TouchableOpacity>
       <Leverage
-        leverage={data.leverage}
+        leverage={accountData.leverage}
         styles={styles}
         setLeverageValue={setLeverageValue}
       />
       <EntryValue
-        entryValue={data.entryValue}
+        entryValue={accountData.entryValue}
         styles={styles}
         setEntryValueValue={setEntryValueValue}
       />
 
-      <TouchableOpacity onPress={() => handleSignOut()} activeOpacity={0.70} style={styles.optionContainer}>
+      <TouchableOpacity onPress={() => handleSignOut()} activeOpacity={0.70} style={[styles.marginTop, styles.optionContainer]}>
         <Text style={styles.optionValue}>Sign out</Text>
       </TouchableOpacity>
     </View>
@@ -76,7 +83,7 @@ const Account = ({ data = {}, setBotOn, setSymbol, pushToSymbols, setStrategy, s
 
 const styles = StyleSheet.create({
   tradeAccountContainer: {
-    flex: 1,
+    flex: 2,
     alignItems: 'flex-start',
     marginHorizontal: 8,
     marginTop: 10
@@ -106,6 +113,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 6
   },
+  marginTop: {
+    marginTop: 10
+  },
   optionLabel: {
     color: '#fff',
     fontSize: 15
@@ -114,8 +124,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18
   },
-  symbol: {
-    fontSize: 23,
+  symbols: {
+    fontSize: 16,
     color: theme.colors.normal
   },
   strategy: {
