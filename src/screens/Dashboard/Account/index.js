@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
@@ -10,8 +10,17 @@ import { useAccountData } from '../../../hooks/accountdata'
 import { useAuth } from '../../../hooks/auth'
 
 const Account = ({ navigation }) => {
+  const [totalGain, setTotalGain] = useState(0)
   const { signOut } = useAuth()
-  const { setAccountApi, accountData, strategies } = useAccountData()
+  const { setAccountApi, accountData, strategies, trades } = useAccountData()
+
+  useEffect(() => {
+    let total = 0
+    trades.forEach(trade => {
+      total += Number(trade.profit)
+    })
+    setTotalGain(total)
+  }, [trades])
 
   const pickerStrategyRef = useRef()
   function toogleBotOn () {
@@ -61,7 +70,7 @@ const Account = ({ navigation }) => {
       />
       <TouchableOpacity activeOpacity={0.70} style={styles.gainContainer}>
         <Text style={styles.optionLabel}>Total Ganho:</Text>
-        <Text style={styles.optionValue}>0%</Text>
+        <Text style={styles.optionValue}>$ {totalGain.toFixed(2)}</Text>
       </TouchableOpacity>
       <Leverage
         leverage={accountData.leverage}

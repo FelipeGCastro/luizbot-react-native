@@ -1,38 +1,53 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, StatusBar } from 'react-native'
 import { Foundation } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
 import { useAccountData } from '../../../hooks/accountdata'
 
 const Trade = () => {
-  const { accountData } = useAccountData
+  const [tradesOn, setTradesOn] = useState([])
+  const { accountData } = useAccountData()
+  useEffect(() => {
+    setTradesOn(accountData)
+  }, [accountData])
   return (
     <View style={styles.tradeWrapper}>
       <View style={styles.tradeStatus}>
-        <Text style={styles.tradeStatusText}>{accountData?.tradeOn ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
-        {accountData?.tradingOn && <Foundation name='record' size={22} color='red' />}
+        <Text style={styles.tradeStatusText}>{tradesOn[0] ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
+        {tradesOn[0] && <Foundation name='record' size={22} color='red' />}
 
       </View>
+      <View style={styles.tradeBoxLabel}>
+        <Text style={styles.tradeLabel}>StopLoss:</Text>
+        <Text style={styles.tradeLabel}>Symbol/Entrada:</Text>
+        <Text style={styles.tradeLabel}>Take Profit:</Text>
+      </View>
       <View style={styles.tradeBox}>
-        <View style={styles.tradeColumn}>
-          <Text style={styles.tradeLabel}>StopLoss:</Text>
-          <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{accountData?.stopMarketPrice || '0.00'}</Text>
-          <Text style={styles.percentage}>0.00%</Text>
-        </View>
-        <View style={[styles.tradeColumn, styles.center]}>
-          <Text style={styles.tradeLabel}>Entrada:</Text>
-          <Text style={styles.tradeValue}>{accountData?.entryPrice || '0.00'}</Text>
-        </View>
-        <View style={[styles.tradeColumn, styles.right]}>
-          <Text style={styles.tradeLabel}>Take Profit:</Text>
-          <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{accountData?.takeProfitPrice || '0.00'}</Text>
-          <Text style={styles.percentage}>0.00%</Text>
-        </View>
+        {tradesOn[0] && tradesOn.map((item, i) => (
+          <View style={styles.tradeRow} key={i}>
+            <View style={styles.tradeColumn}>
+              <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{item.stopMarketPrice || '0.00'}</Text>
+              <Text style={styles.percentage}>0.00%</Text>
+            </View>
+            <View style={[styles.tradeColumn, styles.center]}>
+              <Text style={styles.tradeValue}>{item.symbol}|{item.entryPrice || '0.00'}</Text>
+            </View>
+            <View style={[styles.tradeColumn, styles.right]}>
+              <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{item.takeProfitPrice || '0.00'}</Text>
+              <Text style={styles.percentage}>0.00%</Text>
+            </View>
+          </View>
+        ))}
       </View>
     </View>
   )
 }
-
+// symbol
+// stopMarketPrice
+// takeProfitPrice
+// entryPrice
+// stopOrderCreated
+// profitOrderCreated
 const styles = StyleSheet.create({
   tradeWrapper: {
     alignItems: 'stretch',
@@ -51,15 +66,34 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     marginRight: 5
+
+  },
+  tradeBoxLabel: {
+    marginHorizontal: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    backgroundColor: theme.colors.swipeColor,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopEndRadius: 6,
+    borderTopStartRadius: 6
   },
   tradeBox: {
     marginHorizontal: 8,
     paddingVertical: 8,
     paddingHorizontal: 5,
+    borderWidth: 1,
+    borderColor: theme.colors.swipeColor,
     backgroundColor: theme.colors.button,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderRadius: 6
+    borderBottomEndRadius: 6,
+    borderBottomStartRadius: 6
+  },
+  tradeRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   tradeColumn: {
   },
@@ -73,15 +107,15 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   tradeLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#ffffff'
   },
   tradeValue: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#ffffff'
   },
   percentage: {
-    fontSize: 14,
+    fontSize: 10,
     color: '#fff'
   }
 })

@@ -6,7 +6,7 @@ import TradeComponent from './Trade'
 import Account from './Account'
 
 import theme from '../../global/styles/theme'
-import SwipeButton from 'rn-swipe-button'
+// import SwipeButton from 'rn-swipe-button'
 import TradeHistory from './TradeHistory'
 import { useAccountData } from '../../hooks/accountdata'
 
@@ -17,7 +17,7 @@ const Dashboard = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <TradeComponent />
       <View style={styles.marketSwipe} />
-      <SwipeButton
+      {/* <SwipeButton
         railBackgroundColor={theme.colors.button}
         railFillBackgroundColor={theme.colors.swipeColor}
         titleColor='#fff'
@@ -27,11 +27,11 @@ const Dashboard = ({ navigation }) => {
         thumbIconBorderColor={theme.colors.display}
         thumbIconBackgroundColor={theme.colors.swipeColor}
         icon
-      />
+      /> */}
       {loadingData && <ActivityIndicator color='#fff' size='large' />}
       <View style={styles.tradeBody}>
         <Account navigation={navigation} />
-        <TradeHistory />
+        <TradeHistory navigation={navigation} />
 
       </View>
     </SafeAreaView>

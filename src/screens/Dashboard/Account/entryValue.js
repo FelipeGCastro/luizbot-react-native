@@ -18,7 +18,7 @@ const EntryValue = ({ entryValue, styles, setEntryValueValue }) => {
 
       <TouchableOpacity onPress={() => pickerRef.current.focus()} activeOpacity={0.70} style={styles.optionContainer}>
         <Text style={styles.optionLabel}>Valor Entrada:</Text>
-        <Text style={styles.optionValue}>${Number(entryValue).toFixed(2)}</Text>
+        <Text style={styles.optionValue}>$ {Number(entryValue).toFixed(2)}</Text>
       </TouchableOpacity>
     </>
   )

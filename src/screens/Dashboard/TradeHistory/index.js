@@ -6,19 +6,19 @@ import { useAccountData } from '../../../hooks/accountdata'
 
 // import { Container } from './styles';
 
-const TradeHistory = () => {
+const TradeHistory = ({ navigation }) => {
   const { trades, loadingTrades } = useAccountData()
   return (
     <FlatList
       keyExtractor={item => item._id}
-      data={trades}
+      data={trades.reverse()}
       contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={loadingTrades ? <ActivityIndicator size='large' color='#fff' /> : <View />}
       style={styles.profitHistoryContainer}
       renderItem={({ item }) => {
         const timeTrade = format(new Date(item.timestamp), 'kk:mm')
         return (
-          <TouchableOpacity activeOpacity={0.70} style={styles.profitBox}>
+          <TouchableOpacity onPress={() => navigation.push('Trade', { trade: item })} activeOpacity={0.70} style={styles.profitBox}>
             <Text style={styles.profitTime}>{timeTrade}</Text>
             <Text style={styles.profitValue}>$ {Number(item.profit).toFixed(2)}</Text>
           </TouchableOpacity>
