@@ -6,24 +6,30 @@ import { useAccountData } from '../../../hooks/accountdata'
 
 const Trade = () => {
   const [tradesOn, setTradesOn] = useState([])
+  const [isLive, setIsLive] = useState(false)
   const { accountData, trades } = useAccountData()
-  useEffect(() => {
-    if (accountData?.tradesOn[0]) {
-      setTradesOn(accountData.tradesOn)
-    } else {
-      const tradesObj = {
-        stopMarketPrice: trades[trades.length - 1].stopPrice,
-        entryPrice: trades[trades.length - 1].entryPrice,
-        takeProfitPrice: trades[trades.length - 1].profitPrice
 
+  useEffect(() => {
+    if (accountData && accountData.tradesOn && accountData.tradesOn[0]) {
+      setTradesOn(accountData.tradesOn)
+      setIsLive(true)
+    } else {
+      if (trades && trades[0]) {
+        const tradesObj = {
+          symbol: trades[trades.length - 1].symbol,
+          stopMarketPrice: trades[trades.length - 1].stopPrice,
+          entryPrice: trades[trades.length - 1].entryPrice,
+          takeProfitPrice: trades[trades.length - 1].profitPrice
+
+        }
+        setTradesOn([tradesObj])
       }
-      setTradesOn([tradesObj])
     }
-  }, [accountData])
+  }, [accountData, trades])
   return (
     <View style={styles.tradeWrapper}>
       <View style={styles.tradeStatus}>
-        <Text style={styles.tradeStatusText}>{tradesOn[0] ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
+        <Text style={styles.tradeStatusText}>{isLive ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
         {tradesOn[0] && <Foundation name='record' size={22} color='red' />}
 
       </View>
@@ -40,7 +46,8 @@ const Trade = () => {
               <Text style={styles.percentage}>0.00%</Text>
             </View>
             <View style={[styles.tradeColumn, styles.center]}>
-              <Text style={styles.tradeValue}>{item.symbol}|{item.entryPrice || '0.00'}</Text>
+              <Text style={styles.tradeValue}>{item.entryPrice || '0.00'}</Text>
+              <Text style={styles.percentage}>{item.symbol}</Text>
             </View>
             <View style={[styles.tradeColumn, styles.right]}>
               <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{item.takeProfitPrice || '0.00'}</Text>
@@ -106,6 +113,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   tradeColumn: {
+    flex: 1
   },
   left: {
     alignItems: 'flex-start'
