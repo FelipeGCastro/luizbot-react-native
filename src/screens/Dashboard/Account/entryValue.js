@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { TouchableOpacity, Text } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
 
-const entriesValues = [40, 60, 80, 100, 150, 180, 200, 250, 300, 400, 500, 600, 800]
+const entriesValues = [40, 60, 80, 100, 150, 180, 200, 250, 300, 400, 500, 600, 800, 1000, 1300, 1500, 1800, 200]
 
 const EntryValue = ({ entryValue, styles, setEntryValueValue }) => {
   const pickerRef = useRef()

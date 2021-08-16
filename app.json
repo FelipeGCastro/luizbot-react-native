@@ -1,8 +1,17 @@
 {
   "expo": {
-    "name": "luizbotapp",
+    "name": "Luiz Bot Trader",
     "slug": "luizbotapp",
+    "icon": "./src/assets/drawable-mdpi/icon.png",
     "version": "1.0.0",
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.yourappname",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.yourcompany.yourappname",
+      "versionCode": 1
+    },
     "assetBundlePatterns": [
       "**/*"
     ]

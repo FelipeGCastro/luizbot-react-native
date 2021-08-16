@@ -6,9 +6,19 @@ import { useAccountData } from '../../../hooks/accountdata'
 
 const Trade = () => {
   const [tradesOn, setTradesOn] = useState([])
-  const { accountData } = useAccountData()
+  const { accountData, trades } = useAccountData()
   useEffect(() => {
-    setTradesOn(accountData)
+    if (accountData?.tradesOn[0]) {
+      setTradesOn(accountData.tradesOn)
+    } else {
+      const tradesObj = {
+        stopMarketPrice: trades[trades.length - 1].stopPrice,
+        entryPrice: trades[trades.length - 1].entryPrice,
+        takeProfitPrice: trades[trades.length - 1].profitPrice
+
+      }
+      setTradesOn([tradesObj])
+    }
   }, [accountData])
   return (
     <View style={styles.tradeWrapper}>
