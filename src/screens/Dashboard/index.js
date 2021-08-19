@@ -4,18 +4,17 @@ import { View, StyleSheet, SafeAreaView, ActivityIndicator } from 'react-native'
 
 import TradeComponent from './Trade'
 import Account from './Account'
-
+import { getCorrectContext } from '../../helpers'
 import theme from '../../global/styles/theme'
 // import SwipeButton from 'rn-swipe-button'
 import TradeHistory from './TradeHistory'
-import { useAccountData } from '../../hooks/accountdata'
 
-const Dashboard = ({ navigation }) => {
-  const { loadingData } = useAccountData()
-
+const Dashboard = ({ navigation, account }) => {
+  const context = getCorrectContext(account)
+  const { loadingData } = context()
   return (
     <SafeAreaView style={styles.container}>
-      <TradeComponent />
+      <TradeComponent account={account} />
       <View style={styles.marketSwipe} />
       {/* <SwipeButton
         railBackgroundColor={theme.colors.button}
@@ -30,8 +29,8 @@ const Dashboard = ({ navigation }) => {
       /> */}
       {loadingData && <ActivityIndicator color='#fff' size='large' />}
       <View style={styles.tradeBody}>
-        <Account navigation={navigation} />
-        <TradeHistory navigation={navigation} />
+        <Account account={account} navigation={navigation} />
+        <TradeHistory account={account} navigation={navigation} />
 
       </View>
     </SafeAreaView>

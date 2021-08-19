@@ -35,14 +35,14 @@ const Symbols = ({ Symbols = [], route, navigation }) => {
   }, [])
 
   async function getSymbols () {
-    const symbolsFetched = await callGetApi('/account/symbols', null, signOut)
+    const symbolsFetched = await callGetApi('/account/primary/symbols', null, signOut)
     await AsyncStorage.setItem('@luizbot:symbols', JSON.stringify(symbolsFetched))
     setSymbolsWithId(symbolsFetched)
   }
 
   async function setSymbols (symbols) {
     setLoadingData(true)
-    await callUptadeApi('/account/symbols', { symbols })
+    await callUptadeApi('/account/primary/symbols', { symbols })
     setLoadingData(false)
     navigation.pop()
   }

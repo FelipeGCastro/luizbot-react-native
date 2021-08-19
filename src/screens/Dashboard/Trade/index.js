@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, StatusBar } from 'react-native'
-import { Foundation } from '@expo/vector-icons'
+import { Foundation, AntDesign } from '@expo/vector-icons'
 import theme from '../../../global/styles/theme'
-import { useAccountData } from '../../../hooks/accountdata'
+import { useTrades } from '../../../hooks/trades'
+import { getCorrectContext, getPercentage } from '../../../helpers/index'
 
-const Trade = () => {
+const Trade = ({ account }) => {
+  const context = getCorrectContext(account)
   const [tradesOn, setTradesOn] = useState([])
   const [isLive, setIsLive] = useState(false)
-  const { accountData, trades } = useAccountData()
+  const { accountData } = context()
+  const { trades } = useTrades()
 
   useEffect(() => {
     if (accountData && accountData.tradesOn && accountData.tradesOn[0]) {
@@ -16,21 +19,22 @@ const Trade = () => {
     } else {
       if (trades && trades[0]) {
         const tradesObj = {
-          symbol: trades[trades.length - 1].symbol,
-          stopMarketPrice: trades[trades.length - 1].stopPrice,
-          entryPrice: trades[trades.length - 1].entryPrice,
-          takeProfitPrice: trades[trades.length - 1].profitPrice
+          symbol: trades[0].symbol,
+          stopMarketPrice: trades[0].stopPrice,
+          entryPrice: trades[0].entryPrice,
+          takeProfitPrice: trades[0].profitPrice
 
         }
         setTradesOn([tradesObj])
+        setIsLive(false)
       }
     }
-  }, [accountData, trades])
+  }, [accountData?.tradesOn, trades])
   return (
     <View style={styles.tradeWrapper}>
       <View style={styles.tradeStatus}>
         <Text style={styles.tradeStatusText}>{isLive ? 'Ao Vivo' : 'Ultimo Trade'}</Text>
-        {tradesOn[0] && <Foundation name='record' size={22} color='red' />}
+        {isLive && <Foundation name='record' size={22} color='red' />}
 
       </View>
       <View style={styles.tradeBoxLabel}>
@@ -42,16 +46,30 @@ const Trade = () => {
         {tradesOn[0] && tradesOn.map((item, i) => (
           <View style={styles.tradeRow} key={i}>
             <View style={styles.tradeColumn}>
-              <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{item.stopMarketPrice || '0.00'}</Text>
-              <Text style={styles.percentage}>0.00%</Text>
+              <View style={styles.priceAndIconContainer}>
+                <Text style={{ ...styles.tradeValue, color: theme.colors.failed }}>{item.stopMarketPrice || '0.00'}</Text>
+                {isLive && (
+                  item.stopOrderCreated
+                    ? <AntDesign name='check' size={14} color={theme.colors.success} />
+                    : <AntDesign name='close' size={14} color={theme.colors.failed} />
+                )}
+              </View>
+              <Text style={styles.percentage}>{getPercentage(item.entryPrice, item.stopMarketPrice).toFixed(2)} %</Text>
             </View>
             <View style={[styles.tradeColumn, styles.center]}>
               <Text style={styles.tradeValue}>{item.entryPrice || '0.00'}</Text>
               <Text style={styles.percentage}>{item.symbol}</Text>
             </View>
             <View style={[styles.tradeColumn, styles.right]}>
-              <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{item.takeProfitPrice || '0.00'}</Text>
-              <Text style={styles.percentage}>0.00%</Text>
+              <View style={styles.priceAndIconContainer}>
+                {isLive && (
+                  item.profitOrderCreated
+                    ? <AntDesign name='check' size={14} color={theme.colors.success} />
+                    : <AntDesign name='close' size={14} color={theme.colors.failed} />
+                )}
+                <Text style={{ ...styles.tradeValue, color: theme.colors.success }}>{item.takeProfitPrice || '0.00'}</Text>
+              </View>
+              <Text style={styles.percentage}>{getPercentage(item.entryPrice, item.takeProfitPrice).toFixed(2)} %</Text>
             </View>
           </View>
         ))}
@@ -96,24 +114,28 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 6
   },
   tradeBox: {
+    flexGrow: 1,
     marginHorizontal: 8,
     paddingVertical: 8,
     paddingHorizontal: 5,
     borderWidth: 1,
     borderColor: theme.colors.swipeColor,
     backgroundColor: theme.colors.button,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     borderBottomEndRadius: 6,
     borderBottomStartRadius: 6
   },
   tradeRow: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
   tradeColumn: {
     flex: 1
+  },
+  priceAndIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start'
   },
   left: {
     alignItems: 'flex-start'

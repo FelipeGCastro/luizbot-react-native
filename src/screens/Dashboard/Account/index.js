@@ -6,29 +6,34 @@ import Symbols from './Symbols'
 import Strategy from './Strategy'
 import Leverage from './Leverage'
 import EntryValue from './entryValue'
-import { useAccountData } from '../../../hooks/accountdata'
 import { useAuth } from '../../../hooks/auth'
+import { getCorrectContext } from '../../../helpers'
+import { useTrades } from '../../../hooks/trades'
 
-const Account = ({ navigation }) => {
+const Account = ({ navigation, account }) => {
+  const context = getCorrectContext(account)
+  const { accountData, setAccountApi, refresh, strategies } = context()
+  const { trades } = useTrades()
+
   const [totalGain, setTotalGain] = useState(0)
   const { signOut } = useAuth()
-  const { setAccountApi, accountData, strategies, trades } = useAccountData()
-
   useEffect(() => {
     let total = 0
-    trades.forEach(trade => {
-      total += Number(trade.profit)
-    })
+    if (trades && trades[0]) {
+      trades.forEach(trade => {
+        total += Number(trade.profit)
+      })
+    }
     setTotalGain(total)
   }, [trades])
 
   const pickerStrategyRef = useRef()
   function toogleBotOn () {
-    const action = accountData.botOn ? 'Desligar' : 'Ligar'
+    const action = accountData?.botOn ? 'Desligar' : 'Ligar'
     setAlert(action, () => setBotOn(!accountData.botOn))
   }
 
-  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData.symbols }) }
+  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData?.symbols }) }
   function setStrategy (strategy) { setAccountApi('/account/strategy', { strategy }) }
   function setLeverage (leverage) { setAccountApi('/account/leverage', { leverage }) }
   function setEntryValue (entryValue) { setAccountApi('/account/entryValue', { entryValue }) }
@@ -52,17 +57,23 @@ const Account = ({ navigation }) => {
   }
   return (
     <View style={styles.tradeAccountContainer}>
-      <TouchableOpacity onPress={toogleBotOn} activeOpacity={0.70} style={styles.tradeOnContainer}>
-        <Feather name='power' size={24} color={accountData?.botOn ? theme.colors.success : theme.colors.failed} />
-        <Text style={styles.tradOnText}>{accountData?.botOn ? 'Ligado' : 'Desligado'}</Text>
-      </TouchableOpacity>
+      <View style={styles.botOnAndRefreshContainer}>
+        <TouchableOpacity onPress={toogleBotOn} activeOpacity={0.70} style={styles.tradeOnContainer}>
+          <Feather name='power' size={24} color={accountData?.botOn ? theme.colors.success : theme.colors.failed} />
+          <Text style={styles.tradOnText}>{accountData?.botOn ? 'Ligado' : 'Desligado'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => refresh()} activeOpacity={0.70} style={styles.tradeOnContainer}>
+          <Text style={styles.refreshText}>Refresh</Text>
+          <Feather name='refresh-ccw' size={24} color='white' />
+        </TouchableOpacity>
+      </View>
       <Symbols
-        symbols={accountData.symbols}
+        symbols={accountData?.symbols}
         pushToSymbols={pushToSymbols}
         styles={styles}
       />
       <Strategy
-        strategy={accountData.strategy}
+        strategy={accountData?.strategy}
         strategies={strategies}
         styles={styles}
         pickerStrategyRef={pickerStrategyRef}
@@ -73,12 +84,12 @@ const Account = ({ navigation }) => {
         <Text style={styles.optionValue}>$ {totalGain.toFixed(2)}</Text>
       </TouchableOpacity>
       <Leverage
-        leverage={accountData.leverage}
+        leverage={accountData?.leverage}
         styles={styles}
         setLeverageValue={setLeverageValue}
       />
       <EntryValue
-        entryValue={accountData.entryValue}
+        entryValue={accountData?.entryValue}
         styles={styles}
         setEntryValueValue={setEntryValueValue}
       />
@@ -97,6 +108,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     marginTop: 10
   },
+  botOnAndRefreshContainer: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
   tradeOnContainer: {
     flexDirection: 'row',
     backgroundColor: theme.colors.button,
@@ -108,6 +125,10 @@ const styles = StyleSheet.create({
   tradOnText: {
     color: '#fff',
     marginLeft: 10
+  },
+  refreshText: {
+    color: '#fff',
+    marginRight: 10
   },
   gainContainer: {
     backgroundColor: theme.colors.button,

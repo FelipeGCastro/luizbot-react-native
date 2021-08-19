@@ -2,16 +2,17 @@ import React from 'react'
 import { FlatList, View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { format } from 'date-fns'
 import theme from '../../../global/styles/theme'
-import { useAccountData } from '../../../hooks/accountdata'
+import { useTrades } from '../../../hooks/trades'
+import { getPercentage } from '../../../helpers'
 
 // import { Container } from './styles';
 
 const TradeHistory = ({ navigation }) => {
-  const { trades, loadingTrades } = useAccountData()
+  const { trades, loadingTrades } = useTrades()
   return (
     <FlatList
       keyExtractor={item => item._id}
-      data={trades.reverse()}
+      data={trades}
       contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={loadingTrades ? <ActivityIndicator size='large' color='#fff' /> : <View />}
       style={styles.profitHistoryContainer}
@@ -19,8 +20,14 @@ const TradeHistory = ({ navigation }) => {
         const timeTrade = format(new Date(item.timestamp), 'kk:mm')
         return (
           <TouchableOpacity onPress={() => navigation.push('Trade', { trade: item })} activeOpacity={0.70} style={styles.profitBox}>
-            <Text style={styles.profitTime}>{timeTrade}</Text>
-            <Text style={styles.profitValue}>$ {Number(item.profit).toFixed(2)}</Text>
+            <View style={styles.textColumn}>
+              <Text style={styles.profitTime}>{timeTrade}</Text>
+              <Text style={{ ...styles.symbol, color: theme.colors.normal }}>{item.symbol.split('USDT')[0]}</Text>
+            </View>
+            <View style={styles.textColumnRight}>
+              <Text style={item.profit < 0 ? styles.profitValueFailed : styles.profitValueSuccess}>$ {Number(item.profit).toFixed(2)}</Text>
+              <Text style={{ ...styles.profitTime }}>{getPercentage(item.entryPrice, item.closePrice).toFixed(2)}%</Text>
+            </View>
           </TouchableOpacity>
         )
       }}
@@ -52,13 +59,29 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 15
   },
+  textColumn: {
+    justifyContent: 'space-between'
+  },
+  textColumnRight: {
+    justifyContent: 'space-between',
+    alignItems: 'flex-end'
+  },
   profitTime: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 14
+  },
+  symbol: {
+    color: '#fff',
+    fontSize: 13,
     marginRight: 7
   },
-  profitValue: {
+  profitValueSuccess: {
     color: theme.colors.success,
+    fontSize: 18,
+    marginLeft: 7
+  },
+  profitValueFailed: {
+    color: theme.colors.failed,
     fontSize: 18,
     marginLeft: 7
   }

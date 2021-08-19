@@ -15,7 +15,7 @@ const Strategies = ({ strategy, strategies, styles, pickerStrategyRef, setStrate
         ref={pickerStrategyRef}
         onValueChange={(itemValue, itemIndex) => setStrategyValue(itemValue)}
       >
-        {Object.keys(strategies).map((strategy, i) => <Picker.Item key={i} label={STRATEGIES[strategies[strategy]]} value={strategies[strategy]} />)}
+        {strategies && Object.keys(strategies).map((strategy, i) => <Picker.Item key={i} label={STRATEGIES[strategies[strategy]]} value={strategies[strategy]} />)}
       </Picker>
       <TouchableOpacity
         onPress={() => pickerStrategyRef.current.focus()}

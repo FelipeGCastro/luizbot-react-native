@@ -18,6 +18,10 @@ const Trade = ({ route }) => {
         <Text style={styles.value}>{trade.side}</Text>
       </View>
       <View style={styles.infoWrapper}>
+        <Text style={styles.label}>Preço do Stop Loss:</Text>
+        <Text style={styles.value}>{trade.stopPrice}</Text>
+      </View>
+      <View style={styles.infoWrapper}>
         <Text style={styles.label}>Preço da Entrada:</Text>
         <Text style={styles.value}>{trade.entryPrice}</Text>
       </View>
