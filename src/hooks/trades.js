@@ -21,8 +21,15 @@ function TradesProvider ({ children }) {
     return () => { isSubscribe = false }
   }, [])
 
+  async function refreshTrades () {
+    setLoadingTrades(true)
+    const data = await callGetApi('/trade/')
+    setTrades(data.reverse())
+    setLoadingTrades(false)
+  }
+
   return (
-    <TradesContext.Provider value={{ loadingTrades, trades }}>
+    <TradesContext.Provider value={{ loadingTrades, trades, refreshTrades }}>
       {children}
     </TradesContext.Provider>
   )

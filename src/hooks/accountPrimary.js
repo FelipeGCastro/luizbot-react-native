@@ -1,7 +1,9 @@
 // import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { callGetApi, callUptadeApi } from '../services/helpers'
+import { listenAccountPrimaryUpdate } from '../services/sockets'
 import { useAuth } from './auth'
+import { useTrades } from './trades'
 
 const AccountPrimaryContext = createContext([])
 
@@ -10,7 +12,7 @@ function AccountPrimaryProvider ({ children }) {
   const [loadingData, setLoadingData] = useState(true)
   const [accountData, setAccountData] = useState({})
   const [strategies, setStrategies] = useState({})
-
+  const { refreshTrades } = useTrades()
   useEffect(() => {
     let isSubscribe = true
     async function getAccountData () {
@@ -26,10 +28,17 @@ function AccountPrimaryProvider ({ children }) {
   }, [])
 
   useEffect(() => {
+    listenAccountPrimaryUpdate(setSocketData)
+  }, [])
+
+  function setSocketData (data) {
+    setAccountData(data)
+  }
+
+  useEffect(() => {
     let isSubscribe = true
     async function getAccountData () {
       const data = await callGetApi('/account/primary/strategies', null, signOut)
-      console.log('buscar estrategias', data)
       if (isSubscribe) {
         setStrategies(data)
       }
@@ -41,8 +50,8 @@ function AccountPrimaryProvider ({ children }) {
   async function refresh () {
     setLoadingData(true)
     const data = await callGetApi('/account/primary', null, signOut)
-    console.log(data)
     setAccountData(data)
+    refreshTrades()
     setLoadingData(false)
   }
 

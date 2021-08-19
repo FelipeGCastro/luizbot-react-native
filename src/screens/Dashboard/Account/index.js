@@ -21,7 +21,12 @@ const Account = ({ navigation, account }) => {
     let total = 0
     if (trades && trades[0]) {
       trades.forEach(trade => {
-        total += Number(trade.profit)
+        if (trade.account === account) {
+          total += Number(trade.profit)
+        }
+        if (!trade.account && account === 'primary') {
+          total += Number(trade.profit)
+        }
       })
     }
     setTotalGain(total)
@@ -33,11 +38,11 @@ const Account = ({ navigation, account }) => {
     setAlert(action, () => setBotOn(!accountData.botOn))
   }
 
-  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData?.symbols }) }
-  function setStrategy (strategy) { setAccountApi('/account/strategy', { strategy }) }
-  function setLeverage (leverage) { setAccountApi('/account/leverage', { leverage }) }
-  function setEntryValue (entryValue) { setAccountApi('/account/entryValue', { entryValue }) }
-  function setBotOn (bool) { setAccountApi('/account/boton', { botOn: bool }) }
+  function pushToSymbols () { navigation.push('Symbols', { symbols: accountData?.symbols, account }) }
+  function setStrategy (strategy) { setAccountApi(`/account/${account}/strategy`, { strategy }) }
+  function setLeverage (leverage) { setAccountApi(`/account/${account}/leverage`, { leverage }) }
+  function setEntryValue (entryValue) { setAccountApi(`/account/${account}/entryValue`, { entryValue }) }
+  function setBotOn (bool) { setAccountApi(`/account/${account}/boton`, { botOn: bool }) }
 
   function setStrategyValue (value) { setAlert(value, () => setStrategy(value)) }
   function setLeverageValue (value) { setAlert(`${value}x`, () => setLeverage(value)) }
@@ -60,7 +65,10 @@ const Account = ({ navigation, account }) => {
       <View style={styles.botOnAndRefreshContainer}>
         <TouchableOpacity onPress={toogleBotOn} activeOpacity={0.70} style={styles.tradeOnContainer}>
           <Feather name='power' size={24} color={accountData?.botOn ? theme.colors.success : theme.colors.failed} />
-          <Text style={styles.tradOnText}>{accountData?.botOn ? 'Ligado' : 'Desligado'}</Text>
+          <View style={styles.botOnAndKeyContainer}>
+            <Text style={styles.tradOnText}>{accountData?.botOn ? 'Ligado' : 'Desligado'}</Text>
+            <Feather name='key' size={12} color={accountData?.listenKeyIsOn ? theme.colors.success : theme.colors.failed} />
+          </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => refresh()} activeOpacity={0.70} style={styles.tradeOnContainer}>
           <Text style={styles.refreshText}>Refresh</Text>
@@ -122,9 +130,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 0
   },
+  botOnAndKeyContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'space-between'
+  },
   tradOnText: {
     color: '#fff',
-    marginLeft: 10
+    marginLeft: 10,
+    fontSize: 15
   },
   refreshText: {
     color: '#fff',

@@ -7,12 +7,12 @@ import { getPercentage } from '../../../helpers'
 
 // import { Container } from './styles';
 
-const TradeHistory = ({ navigation }) => {
+const TradeHistory = ({ navigation, account }) => {
   const { trades, loadingTrades } = useTrades()
   return (
     <FlatList
       keyExtractor={item => item._id}
-      data={trades}
+      data={trades.filter((trade) => trade.account === account || (!trade.account && account === 'primary'))}
       contentContainerStyle={styles.contentContainer}
       ListHeaderComponent={loadingTrades ? <ActivityIndicator size='large' color='#fff' /> : <View />}
       style={styles.profitHistoryContainer}

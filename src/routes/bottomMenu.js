@@ -24,12 +24,12 @@ function TabHome () {
         return <MaterialIcons name='attach-money' size={size} color={color} />
       },
       tabBarActiveTintColor: 'white',
-      tabBarInactiveTintColor: theme.colors.background,
+      tabBarInactiveTintColor: theme.colors.button,
       tabBarStyle: { backgroundColor: theme.colors.swipeColor, paddingBottom: 5 }
     })}
     >
-      <Tab.Screen name='primary' component={AccountPrimaryScreen} options={{ headerShown: false, animationEnabled: false }} />
-      <Tab.Screen name='secondary' component={AccountSecondaryScreen} options={{ headerShown: false, animationEnabled: false }} />
+      <Tab.Screen name='Luiz' component={AccountPrimaryScreen} options={{ headerShown: false, animationEnabled: false }} />
+      <Tab.Screen name='Rebeca' component={AccountSecondaryScreen} options={{ headerShown: false, animationEnabled: false }} />
     </Tab.Navigator>
   )
 }
@@ -37,9 +37,9 @@ function TabHome () {
 function PrivateStack () {
   return (
     <SafeAreaProvider>
-      <AccountPrimaryProvider>
-        <AccountSecondaryProvider>
-          <TradesProvider>
+      <TradesProvider>
+        <AccountPrimaryProvider>
+          <AccountSecondaryProvider>
             <Stack.Navigator initialRouteName='Home'>
               <Stack.Screen options={{ headerShown: false, animationEnabled: false }} name='Home' component={TabHome} />
               <Stack.Screen
@@ -63,10 +63,9 @@ function PrivateStack () {
                 }} name='Trade' component={Trade}
               />
             </Stack.Navigator>
-          </TradesProvider>
-        </AccountSecondaryProvider>
-
-      </AccountPrimaryProvider>
+          </AccountSecondaryProvider>
+        </AccountPrimaryProvider>
+      </TradesProvider>
     </SafeAreaProvider>
 
   )

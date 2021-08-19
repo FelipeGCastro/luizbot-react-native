@@ -7,7 +7,6 @@ async function callGetApi (path, params, signOut) {
       return result.data
     }
   } catch (error) {
-    console.log(error)
     if (error.response.data.error === 'Token invalid') signOut()
   }
 }

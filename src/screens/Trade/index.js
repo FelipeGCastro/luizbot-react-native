@@ -14,6 +14,10 @@ const Trade = ({ route }) => {
         <Text style={styles.value}>{trade.symbol}</Text>
       </View>
       <View style={styles.infoWrapper}>
+        <Text style={styles.label}>Estratégia:</Text>
+        <Text style={styles.value}>{trade.strategy}</Text>
+      </View>
+      <View style={styles.infoWrapper}>
         <Text style={styles.label}>Side:</Text>
         <Text style={styles.value}>{trade.side}</Text>
       </View>

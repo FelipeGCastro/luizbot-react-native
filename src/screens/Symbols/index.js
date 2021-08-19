@@ -13,10 +13,13 @@ const Symbols = ({ Symbols = [], route, navigation }) => {
   const [selectedSymbols, setSelectedSymbols] = useState([])
   const [selectedSymbolsObj, setSelectedSymbolsObj] = useState([])
   const [loadingData, setLoadingData] = useState(true)
+  const [account, setAccount] = useState(null)
 
   useEffect(() => {
-    const { symbols } = route.params
+    const { symbols, account } = route.params
     setSelectedSymbols(symbols)
+    console.log('symbols screen', account)
+    setAccount(account)
     async function getSymbolsData () {
       const symbolsStoraged = await AsyncStorage.getItem('@luizbot:symbols')
       if (symbolsStoraged) {
@@ -42,7 +45,11 @@ const Symbols = ({ Symbols = [], route, navigation }) => {
 
   async function setSymbols (symbols) {
     setLoadingData(true)
-    await callUptadeApi('/account/primary/symbols', { symbols })
+    if (account) {
+      setLoadingData(false)
+      return
+    }
+    await callUptadeApi(`/account/${account}/symbols`, { symbols })
     setLoadingData(false)
     navigation.pop()
   }
