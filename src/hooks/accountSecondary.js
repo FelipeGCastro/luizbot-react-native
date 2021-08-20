@@ -1,7 +1,6 @@
 // import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { callGetApi, callUptadeApi } from '../services/helpers'
-import { listenAccountSecondaryUpdate } from '../services/sockets'
 import { useAuth } from './auth'
 import { useTrades } from './trades'
 
@@ -18,6 +17,7 @@ function AccountSecondaryProvider ({ children }) {
     let isSubscribe = true
     async function getAccountData () {
       const data = await callGetApi('/account/secondary', null, signOut)
+
       if (isSubscribe) {
         setAccountData(data)
         setLoadingData(false)
@@ -27,14 +27,6 @@ function AccountSecondaryProvider ({ children }) {
     getAccountData()
     return () => { isSubscribe = false }
   }, [])
-
-  useEffect(() => {
-    listenAccountSecondaryUpdate(setSocketData)
-  }, [])
-
-  function setSocketData (data) {
-    setAccountData(data)
-  }
 
   useEffect(() => {
     let isSubscribe = true
@@ -64,7 +56,7 @@ function AccountSecondaryProvider ({ children }) {
     setLoadingData(false)
   }
   return (
-    <AccountSecondaryContext.Provider value={{ loadingData, refresh, setAccountApi, accountData, strategies }}>
+    <AccountSecondaryContext.Provider value={{ loadingData, setAccountData, refresh, setAccountApi, accountData, strategies }}>
       {children}
     </AccountSecondaryContext.Provider>
   )

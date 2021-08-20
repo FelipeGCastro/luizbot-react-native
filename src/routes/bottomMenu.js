@@ -11,6 +11,7 @@ import theme from '../global/styles/theme'
 import Symbols from '../screens/Symbols'
 import Trade from '../screens/Trade'
 import { createStackNavigator } from '@react-navigation/stack'
+import SocketProvider from '../hooks/socketHooks'
 
 const Stack = createStackNavigator()
 
@@ -40,29 +41,31 @@ function PrivateStack () {
       <TradesProvider>
         <AccountPrimaryProvider>
           <AccountSecondaryProvider>
-            <Stack.Navigator initialRouteName='Home'>
-              <Stack.Screen options={{ headerShown: false, animationEnabled: false }} name='Home' component={TabHome} />
-              <Stack.Screen
-                options={{
-                  title: 'Simbolos',
-                  animationEnabled: false,
-                  headerStyle: {
-                    backgroundColor: theme.colors.button
-                  },
-                  headerTintColor: '#fff'
-                }} name='Symbols' component={Symbols}
-              />
-              <Stack.Screen
-                options={{
-                  title: 'Operação',
-                  animationEnabled: false,
-                  headerStyle: {
-                    backgroundColor: theme.colors.button
-                  },
-                  headerTintColor: '#fff'
-                }} name='Trade' component={Trade}
-              />
-            </Stack.Navigator>
+            <SocketProvider>
+              <Stack.Navigator initialRouteName='Home'>
+                <Stack.Screen options={{ headerShown: false, animationEnabled: false }} name='Home' component={TabHome} />
+                <Stack.Screen
+                  options={{
+                    title: 'Simbolos',
+                    animationEnabled: false,
+                    headerStyle: {
+                      backgroundColor: theme.colors.button
+                    },
+                    headerTintColor: '#fff'
+                  }} name='Symbols' component={Symbols}
+                />
+                <Stack.Screen
+                  options={{
+                    title: 'Operação',
+                    animationEnabled: false,
+                    headerStyle: {
+                      backgroundColor: theme.colors.button
+                    },
+                    headerTintColor: '#fff'
+                  }} name='Trade' component={Trade}
+                />
+              </Stack.Navigator>
+            </SocketProvider>
           </AccountSecondaryProvider>
         </AccountPrimaryProvider>
       </TradesProvider>

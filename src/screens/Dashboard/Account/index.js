@@ -35,7 +35,7 @@ const Account = ({ navigation, account }) => {
   const pickerStrategyRef = useRef()
   function toogleBotOn () {
     const action = accountData?.botOn ? 'Desligar' : 'Ligar'
-    setAlert(action, () => setBotOn(!accountData.botOn))
+    setAlert(action, () => setBotOn(!accountData?.botOn))
   }
 
   function pushToSymbols () { navigation.push('Symbols', { symbols: accountData?.symbols, account }) }
